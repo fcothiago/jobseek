@@ -1,0 +1,28 @@
+{
+  "name": "jobseek",
+  "version": "1.0.0",
+  "description": "A web scraping tool to automate job searching on hiring platforms popular in the Brazilian market.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fcothiago/jobseek.git"
+  },
+  "keywords": [
+    "webscrapper",
+    "job seeking",
+    "brazillian market"
+  ],
+  "author": "fco.thiago",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fcothiago/jobseek/issues"
+  },
+  "homepage": "https://github.com/fcothiago/jobseek#readme",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "mongoose": "^8.17.0"
+  }
+}
