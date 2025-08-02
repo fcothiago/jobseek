@@ -11,7 +11,8 @@ const companySchema = new mongoose.Schema({
 		required:true
 	},
 	jobs:{
-		type:[jobSchema],
+		type:mongoose.Schema.Types.ObjectId,
+		ref:'Job',
 		required:true
 	}
 });

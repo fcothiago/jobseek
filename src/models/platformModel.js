@@ -10,10 +10,11 @@ const platformSchema = new mongoose.Schema({
 		type:Date,
 		required:true
 	},
-	companies:{
-		type:[companySchema],
+	companies:[{
+		type:mongoose.Schema.Types.ObjectId,
+		ref:'Company',
 		required:true
-	}
+	}]
 });
 const Platform = mongoose.model('Platform',platformSchema);
-module.exports = [Platform,plataformSchema];
+module.exports = [Platform,platformSchema];
