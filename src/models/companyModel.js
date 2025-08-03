@@ -6,12 +6,12 @@ const companySchema = new mongoose.Schema({
 		require:true,
 		unique:true
 	},
-	lastupdate:{
+	lastUpdate:{
 		type:Date,
 		required:true
 	},
 	jobs:{
-		type:mongoose.Schema.Types.ObjectId,
+		type:[mongoose.Schema.Types.ObjectId],
 		ref:'Job',
 		required:true
 	}

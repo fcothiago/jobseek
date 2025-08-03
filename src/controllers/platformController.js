@@ -1,9 +1,9 @@
 const [Platform,platformSchema] = require('../models/platformModel');
-exports.addPlatform = async (name,lastupdate) => {
+exports.addPlatform = async (data) => {
 	try{
 		const platformData = {
-			name:name,
-			lastUpdate:lastupdate,
+			name:data.name,
+			lastUpdate:data.lastupdate,
 			companies:[]
 		};
 		return await Platform.create(platformData);
@@ -29,7 +29,7 @@ exports.getPlatformByName = async (name) => {
 		return null;
 	}
 };
-exports.updatetPlatformById = async (id,data) => {
+exports.updatePlatformById = async (id,data) => {
 	try{
 		const platform = await Platform.findByIdAndUpdate(id,data,{
 			new:true,
@@ -43,7 +43,7 @@ exports.updatetPlatformById = async (id,data) => {
 		return null;
 	}
 }; 
-exports.updatetPlatformByName = async (name,data) => {
+exports.updatePlatformByName = async (name,data) => {
 	try{
 		const platform = await Platform.findOneAndUpdate({name:name},data,{
 			new:true,
@@ -56,4 +56,24 @@ exports.updatetPlatformByName = async (name,data) => {
 		console.error(err);
 		return null;
 	}
-}; 
+};
+exports.deletePlatformByName = async (name) => {
+	try{
+		const platform = await Platform.findOneAndDelete({name:name});
+		return platform ? platform : null;
+	}
+	catch(err){
+		console.error(err);
+		return null;
+	}
+};
+exports.deletePlatformById = async (id) => {
+	try{
+		const platform = await Platform.findByIdAndDelete(id);
+		return platform ? platform : null;
+	}
+	catch(err){
+		console.error(err);
+		return null;
+	}
+};
