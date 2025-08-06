@@ -5,13 +5,13 @@ exports.addCompany = async (data) => {
 	const session = await mongoose.startSession();
 	try{
 		await session.startTransaction();
-		const company = await Company.create({
+		const company = await Company.create([{
 			name:data.name,
 			lastUpdate:data.lastUpdate,
 			jobs:[]
-		},{session});
+		}],{session});
 		await Platform.findByIdAndUpdate(data.platformId,{
-			$push : {companies:company._id}
+			$push : [{companies:company._id}]
 		},{session});
 		await session.commitTransaction();
 	}catch(err){
