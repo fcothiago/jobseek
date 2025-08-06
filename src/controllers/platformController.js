@@ -3,8 +3,7 @@ exports.addPlatform = async (data) => {
 	try{
 		const platformData = {
 			name:data.name,
-			lastUpdate:data.lastupdate,
-			companies:[]
+			lastUpdate:data.lastupdate
 		};
 		return await Platform.create(platformData);
 	}

@@ -2,23 +2,15 @@ const mongoose = require('mongoose');
 const [Platform,platformSchema] = require('../models/platformModel');
 const [Company,companySchema] = require('../models/companyModel');
 exports.addCompany = async (data) => {
-	const session = await mongoose.startSession();
 	try{
-		await session.startTransaction();
 		const company = await Company.create([{
 			name:data.name,
 			lastUpdate:data.lastUpdate,
-			jobs:[]
-		}],{session});
-		await Platform.findByIdAndUpdate(data.platformId,{
-			$push : [{companies:company._id}]
-		},{session});
-		await session.commitTransaction();
+			platformId:data.platformId
+		}]);
+		return company;
 	}catch(err){
 		console.error(err);
-		await session.abortTransaction();
-	}finally{
-		await session.endSession();
 	}
 };
 exports.getCompaniesByName = async (name) => {

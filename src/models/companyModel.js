@@ -10,9 +10,9 @@ const companySchema = new mongoose.Schema({
 		type:Date,
 		required:true
 	},
-	jobs:{
-		type:[mongoose.Schema.Types.ObjectId],
-		ref:'Job',
+	platformId:{
+		type:mongoose.Schema.Types.ObjectId,
+		ref:'Platform',
 		required:true
 	}
 });

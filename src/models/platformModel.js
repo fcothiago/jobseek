@@ -9,12 +9,7 @@ const platformSchema = new mongoose.Schema({
 	lastUpdate:{
 		type:Date,
 		required:true
-	},
-	companies:[{
-		type:mongoose.Schema.Types.ObjectId,
-		ref:'Company',
-		required:true
-	}]
+	}
 });
 const Platform = mongoose.model('Platform',platformSchema);
 module.exports = [Platform,platformSchema];
