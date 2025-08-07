@@ -1,23 +1,24 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const platformController = require('./controllers/platformController');
-const companyController = require('./controllers/companyController');
-const jobController = require('./controllers/jobController');
-mongoose.connect(process.env.MONGO_URI).then( () => {
-	console.log('Connected to MongoDB')
-	companyController.getCompanyById(new mongoose.Types.ObjectId('689385c264e26cab7e7b684b')).then( async comp => {
-		const id = comp._id;
-		const d = new Date();
-		const job = await jobController.addJob({
-			companyId:comp._id,
-			title:'DEV JR com 30 anos de experiencia',
-			publicationDate: d,
-			foundDate: d,
-			url:'www.google.com',
-			keywords:['java','python','node']
+const { Worker } = require('worker_threads');
+const runWorker = (workerPath) => {
+	return new Promise((resolve,reject) => {
+		const worker = new Worker(workerPath,{
+			workerData:{
+				uri:process.env.MONGO_URI
+			}
 		});
-		console.log(job);
-		console.log(comp.jobs);
-	}).catch( err => console.error(err));
+		worker.on('message',resolve);
+		worker.on('error',reject);
+		worker.on('exit', code => {
+			if(code !== 0)
+				reject(new Error(`Worker ${workerPath} exited with code ${code}`))
+		});
+	});	
+};
+const workersBasePath = './src/workers/'
+const workers = ['inhire'];
+const promises = workers.map(worker => runWorker(`${workersBasePath}${worker}`));
+Promise.all(promises).then(result => {
+	result.forEach(i => console.log(i));
 });
-
