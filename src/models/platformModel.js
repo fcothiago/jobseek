@@ -8,7 +8,7 @@ const platformSchema = new mongoose.Schema({
 	},
 	lastUpdate:{
 		type:Date,
-		required:true
+		required:false
 	}
 });
 const Platform = mongoose.model('Platform',platformSchema);

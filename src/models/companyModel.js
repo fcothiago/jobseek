@@ -8,7 +8,7 @@ const companySchema = new mongoose.Schema({
 	},
 	lastUpdate:{
 		type:Date,
-		required:true
+		required:false
 	},
 	platformId:{
 		type:mongoose.Schema.Types.ObjectId,

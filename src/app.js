@@ -3,11 +3,7 @@ const mongoose = require('mongoose');
 const { Worker } = require('worker_threads');
 const runWorker = (workerPath) => {
 	return new Promise((resolve,reject) => {
-		const worker = new Worker(workerPath,{
-			workerData:{
-				uri:process.env.MONGO_URI
-			}
-		});
+		const worker = new Worker(workerPath);
 		worker.on('message',resolve);
 		worker.on('error',reject);
 		worker.on('exit', code => {

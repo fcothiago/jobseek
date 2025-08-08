@@ -1,5 +1,7 @@
-const { workerData, parentPort } = require('worker_threads');
+const axios = require('axios').default;
+const xml2js = require('xml2js');
 const mongoose = require('mongoose');
+const puppeteer = require('puppeteer');
 const platformController = require('../controllers/platformController');
 const companyController = require('../controllers/companyController');
 const jobController = require('../controllers/jobController');
@@ -8,14 +10,34 @@ const checkDB = async () => {
 	let plat = await platformController.getPlatformByName('inhire');
 	if(!plat)
 		plat = await platformController.addPlatform({
-			name:'inhire',
-			lastUpdate: new Date()
+			name:'inhire'
 		});
 	return plat;
 };
-mongoose.connect(workerData.uri).then( async () => {
+const updateCompaniesList = async () => {
+	console.log('Updating companies in inhire.app ');
+	const xml = await axios.get(siteMap);
+	const parser = new xml2js.Parser();
+	const result = await parser.parseStringPromise(xml.data);
+	const urls = result.urlset.url.map(item => item.loc[0]);
+	const regex = /^https:\/\/www\.inhire\.com\.br\/carreiras[\/-]*/;
+	const companiesNames = urls.filter(item => regex.test(item)).map(item => {
+		return item.replace(regex,'').replace('/','');
+	});
+	companiesNames.forEach( name => {
+		console.log(name);
+	});
+};
+mongoose.connect(process.env.MONGO_URI).then( async () => {
 	console.log('connected');
 	const platform = await checkDB();
-	console.log(platform);
+	const browser = await puppeteer.launch({
+		headless: true, 
+		executablePath:process.env.CHROMIUM_PATH
+	});
+	const page = await browser.newPage();
+	if(!platform.lastUpdate)
+		await updateCompaniesList(page);
 	await mongoose.disconnect();
+	await browser.close();
 });
