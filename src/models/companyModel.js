@@ -6,6 +6,11 @@ const companySchema = new mongoose.Schema({
 		require:true,
 		unique:true
 	},
+	url:{
+		type:String,
+		require:false,
+		unique:false
+	},
 	lastUpdate:{
 		type:Date,
 		required:false

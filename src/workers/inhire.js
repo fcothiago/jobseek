@@ -14,18 +14,24 @@ const checkDB = async () => {
 		});
 	return plat;
 };
-const updateCompaniesList = async () => {
+const searchCompanies = async () => {
 	console.log('Updating companies in inhire.app ');
 	const xml = await axios.get(siteMap);
 	const parser = new xml2js.Parser();
 	const result = await parser.parseStringPromise(xml.data);
-	const urls = result.urlset.url.map(item => item.loc[0]);
+	let urls = result.urlset.url.map(item => item.loc[0]);
 	const regex = /^https:\/\/www\.inhire\.com\.br\/carreiras[\/-]*/;
-	const companiesNames = urls.filter(item => regex.test(item)).map(item => {
-		return item.replace(regex,'').replace('/','');
+	return urls.filter(item => regex.test(item)).map(item => {
+		const name = item.replace(regex,'').replace('/','');
+		return {
+			name:name,
+			url:url
+		};
 	});
-	companiesNames.forEach( name => {
-		console.log(name);
+};
+const updateCompanies = (companies,platform) => {
+	return await companies.map( async comp => {
+
 	});
 };
 mongoose.connect(process.env.MONGO_URI).then( async () => {
@@ -37,7 +43,10 @@ mongoose.connect(process.env.MONGO_URI).then( async () => {
 	});
 	const page = await browser.newPage();
 	if(!platform.lastUpdate)
-		await updateCompaniesList(page);
+	{
+		const search = await searchCompanies();
+
+	}
 	await mongoose.disconnect();
 	await browser.close();
 });

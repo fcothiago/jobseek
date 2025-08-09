@@ -27,12 +27,12 @@ exports.getCompanyById = async (id) => {
 		console.error(err);
 	}
 };
-exports.updateCompanyById = async (id,data) => {
+exports.updateCompanyById = async (id,data,upsert) => {
 	try{
 		const company = await Company.findByIdAndUpdate(id,data,{
 			new:true,
 			runValidators:true,
-			upsert:false
+			upsert:upsert ? upsert : false
 		});
 		return company;
 	}catch(err){
