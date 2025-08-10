@@ -13,9 +13,10 @@ exports.addCompany = async (data) => {
 		console.error(err);
 	}
 };
-exports.getCompaniesByName = async (name) => {
+exports.getCompaniesByName = async (name,platformId) => {
 	try{
-		return await Company.findAll({name:name});
+		return platformId ? await Company.find({name:name,platformId:platformId}) 
+				  : await Company.find({name:name});
 	}catch(err){
 		console.error(err);
 	}
