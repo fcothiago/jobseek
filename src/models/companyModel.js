@@ -8,12 +8,9 @@ const companySchema = new mongoose.Schema({
 	},
 	url:{
 		type:String,
-		require:false,
-		unique:false
 	},
 	lastUpdate:{
 		type:Date,
-		required:false
 	},
 	platformId:{
 		type:mongoose.Schema.Types.ObjectId,

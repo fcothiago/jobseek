@@ -5,6 +5,7 @@ exports.addCompany = async (data) => {
 	try{
 		const company = await Company.create([{
 			name:data.name,
+			url:data.url,
 			lastUpdate:data.lastUpdate,
 			platformId:data.platformId
 		}]);
