@@ -21,6 +21,10 @@ const jobSchema = new mongoose.Schema({
 		type:Date,
 		required:false
 	},
+	location:{
+		type:String,
+		required:false
+	},
 	url : {
 		type:String,
 		required:true,

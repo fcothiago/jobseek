@@ -30,6 +30,13 @@ exports.getJobById = async (id) => {
                 console.error(err);
         }
 };
+exports.getJobByUrl = async (url) => {
+        try{
+                return await Job.findOne({url:url});
+        }catch(err){
+                console.error(err);
+        }
+};
 exports.updateCompanyById = async (id,data) => {
         try{
                 const job = await Job.findByIdAndUpdate(id,data,{

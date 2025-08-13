@@ -1,3 +1,4 @@
+const utils = require('./utils');
 const puppeteer = require('puppeteer');
 const axios = require('axios').default;
 const cheerio = require('cheerio');
@@ -36,23 +37,43 @@ const updateCompanies = async (companies,platform) => {
 	{
 		let comp_ = await companyController.getCompaniesByName(comp.name,platform._id);
 		comp_  = comp_.length ? comp_[0] : await companyController.addCompany({
-			name:comp.name,
-			url:comp.url.toString(),
-			platformId:platform._id
-		})
+				name:comp.name,
+				url:comp.url.toString(),
+				platformId:platform._id
+		});
 		result.push(comp_);
 	}
 	return result;
 };
-const extractJobsLinks = async (url,page) => {
-	await page.goto(url, { waitUntil: 'networkidle0' });
-	const regex = /.*\/vagas\/.*/;
-	const links = await page.$$eval('a', anchors => anchors.map(a => a.href))
-	return links.filter( link => { 
-		regex.test(link);
-	}).map(link => `${url}${link}`);
+const extractJobs = async (url) => {
+	const subdomain = url.replace('https://','').replace('.inhire.app/vagas','')
+	const {data:jobs} = await axios.get('https://api.inhire.app/job-posts/public/pages',{
+		headers:{
+			'X-Tenant' : subdomain
+		}
+	});
+	return jobs ? jobs['jobsPage'].filter( job => job.status === 'published'  ).map(job => { 
+		return {
+			title:job.displayName,
+			location:job.location,
+			keywords:[job.workplaceType],
+			url:`${url}${job.jobId}`
+		};		
+	}) : [] ;
 };
-const searchForJobs = async (companies,page) => {
+const updateJobs = async (jobs,company) => {
+	for(const data of jobs)
+	{
+		let job = await jobController.getJobByUrl(data.url);
+		job = job ? job :  await jobController.addJob({
+			...data,
+			companyId:company._id,
+			foundDate:new Date()
+		});
+		console.log(job);
+	}
+};
+const searchForJobs = async (companies) => {
 	for(const comp of companies)
 	{
 		const { data: html } = await axios.get(comp.url);
@@ -69,10 +90,8 @@ const searchForJobs = async (companies,page) => {
 		});
 		if(jobsUrl)
 		{
-			const jobs = await extractJobsLinks(jobsUrl,page);
-			jobs.forEach(item => {
-				console.log(item);
-			});
+			const jobs = await extractJobs(jobsUrl);
+			await updateJobs(jobs,comp);
 		}
 		break;
 	}
@@ -80,18 +99,12 @@ const searchForJobs = async (companies,page) => {
 const workflow = async () => {
 	console.log('connected');
 	const platform = await checkDB().then( result => result);
-	const browser = await puppeteer.launch({
-		headless: false,
-		executablePath:process.env.CHROMIUM_PATH
-	});
-	const page = await browser.newPage();
 	if(!platform.lastUpdate)
 	{
 		const search = await searchCompanies();
 		const companies = await updateCompanies(search,platform);
-		const jobs = await searchForJobs(companies,page); 
+		const jobs = await searchForJobs(companies); 
 	}
-	//await browser.close();
 	await mongoose.disconnect();
 };
 mongoose.connect(process.env.MONGO_URI).then( () => {
