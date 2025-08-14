@@ -1,4 +1,3 @@
-const utils = require('./utils');
 const puppeteer = require('puppeteer');
 const axios = require('axios').default;
 const cheerio = require('cheerio');
