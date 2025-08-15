@@ -92,7 +92,6 @@ const searchForJobs = async (companies) => {
 			const jobs = await extractJobs(jobsUrl);
 			await updateJobs(jobs,comp);
 		}
-		break;
 	}
 };
 const workflow = async () => {
