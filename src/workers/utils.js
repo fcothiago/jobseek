@@ -1,5 +1,8 @@
 const axios = require('axios').default;
 const cheerio = require('cheerio');
+function delay(ms){
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 exports.googleQuery = async (query,pages) => {
 	let result = [];
 	const baseUrl = `https://www.googleapis.com/customsearch/v1`;
@@ -31,11 +34,9 @@ exports.googleQuery = async (query,pages) => {
 const extractLinksFromDDG = (html) => {
 	let result = [];
 	const $ = cheerio.load(html);
-	const regex = /^https:\/\/vagas\.solides\.com\.br\.app\/vagas/;
-	$('a.result__url').each( (i,el) => {
+	$('.result__url').each( (i,el) => {
 		const href = $(el).attr('href');
-		if(regex.test(href))
-			result.push(href);
+		result.push(href);
 	});
 	return result;
 };
@@ -43,16 +44,23 @@ exports.duckDuckGoQuery = async (query,pages) => {
 	let result = [];
 	const baseUrl = `https://html.duckduckgo.com/html/`;
 	const body = { b:"", q:query };
-	for(let page = 0; page < pages ; pages++)
+	for(let page = 0; page < pages ; page++)
 	{
 		try{	
-			const {data:html} = await axios.post(baseUrl,
-				page === 0 ? body  : {...body , s:page*10}
-			);
+			const data = page == 0 ? {...body} : {...body , s:page*10};
+			const {data:html} = await axios.post(baseUrl, data,{
+				headers:{
+					'User-Agent':'PostmanRuntime/7.45.0',
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'Host':'html.duckduckgo.com'
+				}
+			});
 			const links = extractLinksFromDDG(html);
 			result.concat(links);
 			if(links.length < 10)
 				break;
+			await delay(process.env.DDG_QUERY_DELAY_MS);
+
 		}
 		catch(e){
 			console.error(`Request to DuckDuckGo returned code ${e.response.status}`);
