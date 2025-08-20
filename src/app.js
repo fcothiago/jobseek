@@ -1,4 +1,5 @@
 require('dotenv').config();
+const utils = require('./workers/utils');
 const mongoose = require('mongoose');
 const { Worker } = require('worker_threads');
 const runWorker = (workerPath) => {
@@ -13,7 +14,7 @@ const runWorker = (workerPath) => {
 	});	
 };
 const workersBasePath = './src/workers/'
-const workers = ['solidjobs'];
+const workers = ['solides'];
 const promises = workers.map(worker => runWorker(`${workersBasePath}${worker}`));
 Promise.all(promises).then(result => {
 	result.forEach(i => console.log(i));

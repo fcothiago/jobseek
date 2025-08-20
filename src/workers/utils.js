@@ -3,24 +3,24 @@ const cheerio = require('cheerio');
 function delay(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-exports.googleQuery = async (query,pages) => {
+exports.googleQuery = async (query,pages,num=10) => {
 	let result = [];
 	const baseUrl = `https://www.googleapis.com/customsearch/v1`;
-	for(let page = 0; page < pages ; pages++)
+	for(let page = 0; page < pages ; page++)
 	{
 		try{
 			const response = await axios.get(baseUrl,{
 				params:{
 					key:process.env.GOOGLE_SEARCH_API_KEY,
 					cx:process.env.GOOGLE_SEARCH_API_CX,
-					num:10,
-					startIndex:page*10+1,
+					num:num,
+					startIndex:page*num+1,
 					q:query
 				}
 			});
 			const links = response.data.items.map(item => item.link);
-			result.concat(links);
-			if(links.length < 10)
+			result = result.concat(links);
+			if(links.length < num)
 				break;
 		}
 		catch(e){
@@ -56,11 +56,10 @@ exports.duckDuckGoQuery = async (query,pages) => {
 				}
 			});
 			const links = extractLinksFromDDG(html);
-			result.concat(links);
+			result = result.concat(links);
 			if(links.length < 10)
 				break;
 			await delay(process.env.DDG_QUERY_DELAY_MS);
-
 		}
 		catch(e){
 			console.error(`Request to DuckDuckGo returned code ${e.response.status}`);
