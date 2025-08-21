@@ -28,6 +28,7 @@ const jobSchema = new mongoose.Schema({
 	url : {
 		type:String,
 		required:true,
+		unique:true
 	}
 });
 const Job = mongoose.model('Job',jobSchema);

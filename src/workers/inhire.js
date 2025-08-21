@@ -69,7 +69,6 @@ const updateJobs = async (jobs,company) => {
 			companyId:company._id,
 			foundDate:new Date()
 		});
-		console.log(job);
 	}
 };
 const searchForJobs = async (companies) => {
@@ -101,7 +100,7 @@ const workflow = async () => {
 	{
 		const search = await searchCompanies();
 		const companies = await updateCompanies(search,platform);
-		const jobs = await searchForJobs(companies); 
+		await searchForJobs(companies); 
 	}
 	await mongoose.disconnect();
 };

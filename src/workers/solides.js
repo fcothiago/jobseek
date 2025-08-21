@@ -60,12 +60,14 @@ const extractKeywords = (item) => {
 	const city = item.city.name;
 	const type = item.jobType;
 	const seniority = item.seniority.map(item => item.name);
-	const contract = item.recruitmentContractType.map(item => item.name));
-	const benefits = item.benefits.map(item => item.name));
-	const education = item.education.map(item => item.name );
+	const contract = item.recruitmentContractType.map(item => item.name);
+	const benefits = item.benefits.map(item => item.name);
+	const education = item.education.map(item => item.name);
 	const occupationAreas = item.occupationAreas.map(item => item.name);
 	const hardSkills = item.hardSkills.map(item => item.name);
-	return [seniority,contract,benefits,education,occupationAreas,hardSkills];
+	return [seniority,contract,benefits,education,occupationAreas,hardSkills].reduce( (acc,item) => {
+		return acc.concat(item);
+	},[state,city,type]);
 };
 const extractJobs = async (comp) => {
 	let totalPages=0;
@@ -88,23 +90,21 @@ const extractJobs = async (comp) => {
 				keywords:extractKeywords(item)
 			}
 		});
-		console.log(typeof(jobs));
-		result = result.concat(jobs);
+		result = result.concat(Array(jobs));	
 		if(!totalPages || !currentPage)
 			break;	
+		break;
 	}while(currentPage < totalPages);	
 	return result;
 };
 const searchForJobs = async (companies) => {
-	let result = [];
 	for(const comp of companies)
 	{
 		const jobs = await extractJobs(comp);
-		if(jobs)
-			result = result.concat(jobs);
+		for(const job of jobs )
+			await updateJobs(job,comp);
 		break;
 	}
-	return result;
 };
 const workflow = async () => {
 	console.log('connected');
@@ -113,7 +113,7 @@ const workflow = async () => {
 	{
 		const search = await searchCompanies();
 		const companies = await updateCompanies(search,platform);
-		const jobs = await searchForJobs(companies); 	
+		await searchForJobs(companies); 
 	}
 	await mongoose.disconnect();
 };

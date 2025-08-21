@@ -6,7 +6,7 @@ exports.addJob = async (data) => {
                 const job = await Job.create([{
 			companyId:data.companyId,
                         title:data.title,
-			keywords:data.keyword,
+			keywords:data.keywords,
 			foundDate:data.foundDate,
 			publicationDate:data.publicationDate,
 			url:data.url
