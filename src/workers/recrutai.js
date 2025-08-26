@@ -7,19 +7,18 @@ const platformController = require('../controllers/platformController');
 const companyController = require('../controllers/companyController');
 const jobController = require('../controllers/jobController');
 const utils = require('./utils');
-const queryUrl = 'site:vagas.solides.com.br';
-const apiUrl = 'https://apigw.solides.com.br/jobs/v3/home/vacancy';
+const queryUrl = 'site:jobs.recrut.ai';
 const checkDB = async () => {
-	let plat = await platformController.getPlatformByName('solides');
+	let plat = await platformController.getPlatformByName('recrutai');
 	if(!plat)
 		plat = await platformController.addPlatform({
-			name:'solides'
+			name:'recrutai'
 		});
 	return plat;
 };
 const searchCompanies = async () => {
-	const regex = /^https:\/\/.*\.vagas\.solides\.com\.br/;
-	const google = await utils.googleQuery(queryUrl,10,5);
+	const regex = /^https:\/\/.*\.jobs\.recrut\.ai/;
+	const google = await utils.googleQuery(queryUrl,2,2);
 	const ddg = await utils.duckDuckGoQuery(queryUrl,2);
 	const result = google.concat(ddg);
 	return [...new Set(result)].filter(item => regex.test(item)).map( item => {
@@ -56,52 +55,27 @@ const updateJobs = async (jobs,company) => {
 	}
 };
 const extractKeywords = (item) => {
-	const state = item.state.name;
-	const city = item.city.name;
-	const type = item.jobType;
-	const seniority = item.seniority.map(item => item.name);
-	const contract = item.recruitmentContractType.map(item => item.name);
-	const benefits = item.benefits.map(item => item.name);
-	const education = item.education.map(item => item.name);
-	const occupationAreas = item.occupationAreas.map(item => item.name);
-	const hardSkills = item.hardSkills.map(item => item.name);
-	return [seniority,contract,benefits,education,occupationAreas,hardSkills].reduce( (acc,item) => {
-		return acc.concat(item);
-	},[state,city,type]);
+	
 };
 const extractJobs = async (comp) => {
-	let totalPages=0;
-	let currentPage=1;
-	let result = [];
-	do{
-                const response = await axios.get(apiUrl,{
-			params:{
-				page:currentPage,
-				slug:comp.name
-			}
-		});
-		totalPages = response.data.data.totalPages;
-		currentPage = response.data.data.currentPage;
-		const jobs = response.data.data.data.map( item => {
-			return {
-				title:item.title,
-				url:item.redirectLink,
-				foundDate:new Date(),
-				keywords:extractKeywords(item)
-			}
-		});
-		result = result.concat(Array(jobs));	
-		if(!totalPages || !currentPage)
-			break;	
-	}while(currentPage < totalPages);	
+	const basePath = "company/public-jobs/*/*/*/*/*/";
+	const response = await axios.get(`${comp.url}/${basePath}`);
+	const html = response.data.html;
+	console.log(response);
+	const $ = cheerio.load(html);
+	const result = [];
+	$('a').each( (i,el) => {
+		console.log('link');
+	});
 	return result;
 };
 const searchForJobs = async (companies) => {
 	for(const comp of companies)
 	{
 		const jobs = await extractJobs(comp);
-		for(const job of jobs )
+		for(const job of jobs)
 			await updateJobs(job,comp);
+		break;
 	}
 };
 const workflow = async () => {
@@ -110,7 +84,7 @@ const workflow = async () => {
 	if(!platform.lastUpdate)
 	{
 		const search = await searchCompanies();
-		const companies = await updateCompanies(search,platform);
+		const companies = await updateCompanies(search,platform)
 		await searchForJobs(companies); 
 	}
 	await mongoose.disconnect();
