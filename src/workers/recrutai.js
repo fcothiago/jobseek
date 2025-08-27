@@ -18,7 +18,7 @@ const checkDB = async () => {
 };
 const searchCompanies = async () => {
 	const regex = /^https:\/\/.*\.jobs\.recrut\.ai/;
-	const google = await utils.googleQuery(queryUrl,2,2);
+	const google = await utils.googleQuery(queryUrl,8,2);
 	const ddg = await utils.duckDuckGoQuery(queryUrl,2);
 	const result = google.concat(ddg);
 	return [...new Set(result)].filter(item => regex.test(item)).map( item => {
@@ -54,28 +54,32 @@ const updateJobs = async (jobs,company) => {
 		});
 	}
 };
-const extractKeywords = (item) => {
-	
-};
 const extractJobs = async (comp) => {
 	const basePath = "company/public-jobs/*/*/*/*/*/";
 	const response = await axios.get(`${comp.url}/${basePath}`);
 	const html = response.data.html;
-	console.log(response);
 	const $ = cheerio.load(html);
 	const result = [];
-	$('a').each( (i,el) => {
-		console.log('link');
+	$('div').first().find('div').each( (i,el) => {
+		const keywords = [$(el).text()];
+		console.log(keywords);
+		//keywords = [...,$(el).find('b').map( item => item.text];
+		console.log($(el).attr('href'));
 	});
 	return result;
 };
 const searchForJobs = async (companies) => {
 	for(const comp of companies)
 	{
-		const jobs = await extractJobs(comp);
-		for(const job of jobs)
-			await updateJobs(job,comp);
-		break;
+		try{
+			const jobs = await extractJobs(comp)
+			for(const job of jobs)
+				await updateJobs(job,comp);
+			if(jobs.length > 0)
+				break;
+		}catch{
+			console.log(`Failed to extract jobs from ${comp.name}`);	
+		}
 	}
 };
 const workflow = async () => {
