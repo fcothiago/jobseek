@@ -55,16 +55,31 @@ const updateJobs = async (jobs,company) => {
 	}
 };
 const extractJobs = async (comp) => {
-	const basePath = "company/public-jobs/*/*/*/*/*/";
-	const response = await axios.get(`${comp.url}/${basePath}`);
+	const regex = /^https:\/\/.*\.jobs\.recrut\.ai/;
+	const dataPath = "company/public-jobs/*/*/*/*/*/";
+	const basePath = comp.url.match(regex)[0];
+	const response = await axios.get(`${basePath}/${dataPath}`);
 	const html = response.data.html;
 	const $ = cheerio.load(html);
 	const result = [];
-	$('div').first().find('div').each( (i,el) => {
-		const keywords = [$(el).text()];
-		console.log(keywords);
-		//keywords = [...,$(el).find('b').map( item => item.text];
-		console.log($(el).attr('href'));
+	$('tbody').each( (i,el) => {
+		$(el).find('tr').each( (i,el) =>{
+			const job = $(el).find('td')[0];
+			const title = $(job).text();
+			const url = `${basePath}/${$(job).attr('href')}`;
+			const keywords = [];
+			$(el).find('td').each( (i,el) => {
+				const text = $(el).text();
+				if(text)
+					keywords.push(text);
+			});	
+			result.push({
+				title:title,
+				url:url,
+				foundDate:new Date(),
+				keywords:keywords
+			});
+		});
 	});
 	return result;
 };
@@ -73,11 +88,8 @@ const searchForJobs = async (companies) => {
 	{
 		try{
 			const jobs = await extractJobs(comp)
-			for(const job of jobs)
-				await updateJobs(job,comp);
-			if(jobs.length > 0)
-				break;
-		}catch{
+			await updateJobs(jobs,comp);
+		}catch(e){
 			console.log(`Failed to extract jobs from ${comp.name}`);	
 		}
 	}
@@ -89,6 +101,7 @@ const workflow = async () => {
 	{
 		const search = await searchCompanies();
 		const companies = await updateCompanies(search,platform)
+		const companies = [(await companyController.getCompaniesByName('itrecruiter',platform._id))[0]];
 		await searchForJobs(companies); 
 	}
 	await mongoose.disconnect();

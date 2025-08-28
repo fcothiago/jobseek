@@ -19,7 +19,7 @@ const checkDB = async () => {
 };
 const searchCompanies = async () => {
 	const regex = /^https:\/\/.*\.vagas\.solides\.com\.br/;
-	const google = await utils.googleQuery(queryUrl,10,5);
+	const google = await utils.googleQuery(queryUrl,2,2);
 	const ddg = await utils.duckDuckGoQuery(queryUrl,2);
 	const result = google.concat(ddg);
 	return [...new Set(result)].filter(item => regex.test(item)).map( item => {
@@ -100,8 +100,8 @@ const searchForJobs = async (companies) => {
 	for(const comp of companies)
 	{
 		const jobs = await extractJobs(comp);
-		for(const job of jobs )
-			await updateJobs(job,comp);
+		await updateJobs(job,comp);
+		break;
 	}
 };
 const workflow = async () => {
