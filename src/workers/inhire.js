@@ -95,6 +95,7 @@ const searchForJobs = async (companies) => {
 				await updateJobs(jobs,comp);
 			}
 			console.log(`finished job extraction for ${comp.name} in inhire`);
+		}
 		catch
 		{
 			console.log(`Failed to extract jobs from ${comp.name} in inhire`);
