@@ -100,7 +100,7 @@ const searchForJobs = async (companies) => {
 		{
 			console.log(`Failed to extract jobs from ${comp.name} in inhire`);
 		}
-		utils.delay(60000);
+		await utils.delay(60000);
 	}
 };
 const workflow = async () => {

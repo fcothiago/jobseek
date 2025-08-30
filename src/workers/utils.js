@@ -3,6 +3,7 @@ const cheerio = require('cheerio');
 function delay(ms){
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+exports.delay = (ms) => delay(ms);
 exports.googleQuery = async (query,pages,num=10) => {
 	let result = [];
 	const baseUrl = `https://www.googleapis.com/customsearch/v1`;
