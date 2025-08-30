@@ -18,8 +18,8 @@ const checkDB = async () => {
 };
 const searchCompanies = async () => {
 	const regex = /^https:\/\/.*\.jobs\.recrut\.ai/;
-	const google = await utils.googleQuery(queryUrl,8,2);
-	const ddg = await utils.duckDuckGoQuery(queryUrl,2);
+	const google = await utils.googleQuery(queryUrl,40,10);
+	const ddg = await utils.duckDuckGoQuery(queryUrl,5);
 	const result = google.concat(ddg);
 	return [...new Set(result)].filter(item => regex.test(item)).map( item => {
 		const name = item.replace('https://','').split('.')[0];
@@ -89,9 +89,11 @@ const searchForJobs = async (companies) => {
 		try{
 			const jobs = await extractJobs(comp)
 			await updateJobs(jobs,comp);
+			console.log(`finished job extraction for ${comp.name} in recrutai`);
 		}catch(e){
-			console.log(`Failed to extract jobs from ${comp.name}`);	
+			console.log(`Failed to extract jobs from ${comp.name} in recrutai`);	
 		}
+		await utils.delay(60000);
 	}
 };
 const workflow = async () => {
@@ -100,12 +102,11 @@ const workflow = async () => {
 	if(!platform.lastUpdate)
 	{
 		const search = await searchCompanies();
-		const companies = await updateCompanies(search,platform)
-		const companies = [(await companyController.getCompaniesByName('itrecruiter',platform._id))[0]];
+		const companies = await updateCompanies(search,platform);
 		await searchForJobs(companies); 
 	}
 	await mongoose.disconnect();
 };
 mongoose.connect(process.env.MONGO_URI).then( () => {
-	workflow().then( result => console.log('done for inhire'));
+	workflow().then( result => console.log('done for recrut.ai'));
 });

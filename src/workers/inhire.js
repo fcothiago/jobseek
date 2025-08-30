@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const platformController = require('../controllers/platformController');
 const companyController = require('../controllers/companyController');
 const jobController = require('../controllers/jobController');
+const utils = require('./utils');
 const siteMap = 'https://www.inhire.com.br/page-sitemap.xml';
 const checkDB = async () => {
 	let plat = await platformController.getPlatformByName('inhire');
@@ -74,23 +75,31 @@ const updateJobs = async (jobs,company) => {
 const searchForJobs = async (companies) => {
 	for(const comp of companies)
 	{
-		const { data: html } = await axios.get(comp.url);
-		const $ = cheerio.load(html);
-		const regex = /^https:\/\/.*inhire\.app\/vagas/;
-		let jobsUrl;
-		$('a').each( (i,el) => {
-			const href = $(el).attr('href');
-			if(regex.test(href))
-			{
-				jobsUrl = href;
-				return false;
-			}
-		});
-		if(jobsUrl)
+		try
 		{
-			const jobs = await extractJobs(jobsUrl);
-			await updateJobs(jobs,comp);
+			const { data: html } = await axios.get(comp.url);
+			const $ = cheerio.load(html);
+			const regex = /^https:\/\/.*inhire\.app\/vagas/;
+			let jobsUrl;
+			$('a').each( (i,el) => {
+				const href = $(el).attr('href');
+				if(regex.test(href))
+				{
+					jobsUrl = href;
+					return false;
+				}
+			});
+			if(jobsUrl)
+			{
+				const jobs = await extractJobs(jobsUrl);
+				await updateJobs(jobs,comp);
+			}
+			console.log(`finished job extraction for ${comp.name} in inhire`);
+		catch
+		{
+			console.log(`Failed to extract jobs from ${comp.name} in inhire`);
 		}
+		utils.delay(60000);
 	}
 };
 const workflow = async () => {

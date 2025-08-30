@@ -14,7 +14,7 @@ const runWorker = (workerPath) => {
 	});	
 };
 const workersBasePath = './src/workers/'
-const workers = ['solides'];
+const workers = ['solides','inhire','recrutai'];
 const promises = workers.map(worker => runWorker(`${workersBasePath}${worker}`));
 Promise.all(promises).then(result => {
 	result.forEach(i => console.log(i));

@@ -19,8 +19,8 @@ const checkDB = async () => {
 };
 const searchCompanies = async () => {
 	const regex = /^https:\/\/.*\.vagas\.solides\.com\.br/;
-	const google = await utils.googleQuery(queryUrl,2,2);
-	const ddg = await utils.duckDuckGoQuery(queryUrl,2);
+	const google = await utils.googleQuery(queryUrl,40,10);
+	const ddg = await utils.duckDuckGoQuery(queryUrl,5);
 	const result = google.concat(ddg);
 	return [...new Set(result)].filter(item => regex.test(item)).map( item => {
 		const name = item.replace('https://','').split('.')[0];
@@ -99,9 +99,17 @@ const extractJobs = async (comp) => {
 const searchForJobs = async (companies) => {
 	for(const comp of companies)
 	{
-		const jobs = await extractJobs(comp);
-		await updateJobs(job,comp);
-		break;
+		try
+		{
+			const jobs = await extractJobs(comp);
+			await updateJobs(job,comp);
+			console.log(`finished job extraction for ${comp.name} in solides`);
+		}
+		catch
+		{
+			console.log(`Failed to extract jobs from ${comp.name} in recrutai`);
+		}
+		await utils.delay(60000);
 	}
 };
 const workflow = async () => {
@@ -116,5 +124,5 @@ const workflow = async () => {
 	await mongoose.disconnect();
 };
 mongoose.connect(process.env.MONGO_URI).then( () => {
-	workflow().then( result => console.log('done for inhire'));
+	workflow().then( result => console.log('done for solides'));
 });
